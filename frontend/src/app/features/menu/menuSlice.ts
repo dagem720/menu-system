@@ -36,6 +36,20 @@ export const fetchTopMenuItems = createAsyncThunk("menu/menu-id:menuId", async (
   return response.data;
 });
 
+// delete menu item
+export const deleteMenuItem = createAsyncThunk(
+  'menu/deleteMenuItem', 
+  async (menuId: number, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`/menu/${menuId}`);
+
+      return menuId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete menu item');
+    }
+  }
+);
+
 export const addNewMenu = createAsyncThunk(
   'menu/addNewMenu', 
   async (newItem: MenuItemForm, { rejectWithValue }) => {
@@ -96,6 +110,19 @@ const menuSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(addNewMenu.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.error.message || "An error occurred.";
+    });
+
+    builder.addCase(deleteMenuItem.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteMenuItem.fulfilled, (state, action) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
+      state.loading = false;
+    });
+    builder.addCase(deleteMenuItem.rejected, (state, action) => {
       state.loading = false;
       state.error = action.error.message || "An error occurred.";
     });

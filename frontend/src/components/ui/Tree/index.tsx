@@ -18,10 +18,11 @@ interface TreeNode {
 }
 
 interface TreeComponentProps {
-  selectNode: (nodeInfo: { depth: number; selectedId: string }) => void; // Define the prop type
+  selectNode: (nodeInfo: { depth: number; selectedId: string }) => void;
+  deleteItem: (nodeInfo: { depth: number; selectedId: string }) => void;
 }
 
-const TreeComponent: React.FC<TreeComponentProps> = ({ selectNode }) => {
+const TreeComponent: React.FC<TreeComponentProps> = ({ selectNode, deleteItem }) => {
   const [treeDataN, setTreeData] = useState<TreeNode[] | null>(null);
   const { items, loading, error } = useSelector((state: RootState) => state.menu);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -49,6 +50,15 @@ const TreeComponent: React.FC<TreeComponentProps> = ({ selectNode }) => {
             <button className="rounded-full grid place-items-center h-6 aspect-square text-sm bg-[#253BFF] text-white">
               +
             </button>
+            <button 
+            onClick={()=>{
+             const depth = item.path.split('.').length - 1;
+              const selectedId = item.id.toString();
+              deleteItem({ depth, selectedId });
+            }}
+             className="rounded-full grid place-items-center h-6 aspect-square text-sm bg-[#FF4D4F] text-white">
+              -
+            </button>
           </div>
         ),
         children: [],
@@ -72,11 +82,16 @@ const TreeComponent: React.FC<TreeComponentProps> = ({ selectNode }) => {
   };
 
   const onSelect = (selectedKeys: React.Key[], info: any) => {
-    console.log(info)
     const depth = info.node.pos.split('-').length - 1; 
     const selectedId = info.node.title.props.id;
     selectNode({ depth, selectedId }); 
   };
+
+  const onDelete = (selectedKeys: React.Key[], info: any) => {
+    const depth = info.node.pos.split('-').length - 1; 
+    const selectedId = info.node.title.props.id;
+    deleteItem({ depth, selectedId }); 
+  }
 
   if (!treeDataN) return null;
   const getAllKeys = (data: TreeNode[]): string[] => {

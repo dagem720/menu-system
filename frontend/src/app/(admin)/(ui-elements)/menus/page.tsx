@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TreeComponent from "@/components/ui/Tree";
 import { MdSpaceDashboard } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
-import { addNewMenu, fetchMenuItems, fetchTopMenuItems } from "../../../features/menu/menuSlice";
+import { addNewMenu, fetchMenuItems, fetchTopMenuItems, deleteMenuItem } from "../../../features/menu/menuSlice";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { RootState } from "@/app/store";
+import DeleteModal from "@/components/ui/DeleteModal";
 
 export default function Menus() {
   const dispatch:any = useDispatch();
@@ -18,12 +19,23 @@ export default function Menus() {
     depth: number;
   }
 
+  const defaultModalStatus = {
+    delete: false,
+  };
+  const {loading} = useSelector((state: RootState) => state.menu);
+  const [modalStatus, setModalStatus] = useState(defaultModalStatus);
+  const [selectedItem, setSelectedItem] = useState(
+    null as number | null
+  );
+
+
   const {topMenuItems} = useSelector((state:RootState) => state.menu);
 
   const {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
     reset,
   } = useForm<MenuItemForm>();
@@ -51,6 +63,50 @@ export default function Menus() {
             Menus
           </div>
         </div>
+        <DeleteModal
+        isOpen={modalStatus.delete}
+        setIsOpen={() => {
+          setModalStatus(defaultModalStatus);
+          setSelectedItem(null);
+        }}
+        afterClose={()=>
+        {
+          if(selectedItem){
+            dispatch(fetchMenuItems(selectedItem));
+          }
+        }
+        }
+        title="Delete Menu"
+      >
+        <section className="flex flex-col items-center justify-center gap-4 mt-4">
+          <p className="text-[#4D515A] text-sm font-medium">
+            Are you sure you want to delete this Menu?
+          </p>
+          <section className="flex gap-4">
+            <button
+              className="bg-[#E11D48] text-white font-medium py-2 px-4 rounded-lg"
+              onClick={() => {
+                setModalStatus(defaultModalStatus);
+                setSelectedItem(null);
+              }}
+            >
+              No
+            </button>
+            <button
+              className={`w-full bg-[#3170B5] rounded-md text-white h-[40px]  px-4 sm:px-6 capitalize z-10 cursor-pointer opacity-80 hover:opacity-100 transition-all duration-200 ease-in`}
+              onClick={async () => {
+                console.log(selectedItem)
+              await  dispatch(deleteMenuItem(selectedItem as number));
+              setModalStatus(defaultModalStatus);
+              setSelectedItem(null);
+              dispatch(fetchMenuItems(getValues('topMenuId')));
+              }}
+            >
+              Yes
+            </button>
+          </section>
+        </section>
+      </DeleteModal>
 
         <div className="flex flex-col gap-y-2">
           <span className="text-sm text-[#475467">Menu</span>
@@ -84,6 +140,11 @@ export default function Menus() {
               setValue('parentId', parseInt(e.selectedId))
               setValue('depth', e.depth)
             }}
+            deleteItem={(e)=>{
+              setModalStatus({delete: true})
+              setSelectedItem(parseInt(e.selectedId))
+            }}
+
              />
           </div>
 
