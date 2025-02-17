@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
-        destination: "http://188.245.43.115:3005", 
+        source: "/api/:path*", // Match all paths under /api
+        destination: "http://188.245.43.115:3005/api/:path*", // Forward to the backend server
       },
     ];
   },
