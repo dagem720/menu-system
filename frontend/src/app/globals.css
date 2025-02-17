@@ -47,7 +47,7 @@
     @apply bg-[#9FF443] text-black;
   }
   .menu-dropdown-item-inactive {
-    @apply text-gray-700 ;
+    @apply text-gray-500;
   }
 
   .menu-dropdown-badge {

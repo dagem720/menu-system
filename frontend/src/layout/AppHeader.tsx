@@ -2,9 +2,20 @@
 
 import { useSidebar } from "@/context/SidebarContext";
 import React, { useEffect,useRef, useState} from "react";
+import { usePathname } from "next/navigation";
+  
 
 const AppHeader: React.FC = () => {
 
+  const pathname = usePathname();
+  const pathSegments = pathname.split("/").filter((segment) => segment !== "");
+
+  const formatPageName = (name: string) => {
+    return name
+      .split("-") 
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1)) 
+      .join(" "); 
+  };
 
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
@@ -97,7 +108,15 @@ aria-label="Toggle Sidebar"
         <svg className="rtl:rotate-180  w-3 h-3 mx-1 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
         </svg>
-        <span className="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">/Menus</span>
+        <span className="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">
+      {pathSegments.length > 0 && " / "}
+
+{pathSegments.map((segment, index) => (
+  <span key={index} className="font-semibold">
+    {formatPageName(segment)}
+  </span>
+))}
+        </span>
       </div>
     </li>
   </ol>
